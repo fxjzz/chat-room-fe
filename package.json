@@ -9,14 +9,22 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^1.9.5",
     "@types/node": "18.16.3",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
+    "@types/styled-components": "^5.1.26",
+    "antd": "^5.4.6",
+    "axios": "^1.4.0",
     "eslint": "8.39.0",
     "eslint-config-next": "13.3.4",
     "next": "13.3.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-is": "^18.2.0",
+    "react-redux": "^8.0.5",
+    "socket.io-client": "^4.6.1",
+    "styled-components": "^5.3.10",
     "typescript": "5.0.4"
   }
 }
