@@ -17,7 +17,7 @@ function Login() {
   const dispatch = useDispatch();
 
   const onLogin = async (formData: FormData) => {
-    http.post("auth/login", { formData }).then((res) => {
+    http.post("auth/login", formData).then((res) => {
       dispatch(changeName(formData.username));
       localStorage.setItem("jwt", res.data.access_token);
       router.push("/chat");
