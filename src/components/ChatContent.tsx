@@ -1,8 +1,9 @@
 import { wsHOST } from "@/http/config";
 import { http } from "@/http/http";
 import scrollToBottom from "@/utils/scrollToButtom";
+import sortMsg from "@/utils/sortMsg";
 import { Button } from "antd";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import styled from "styled-components";
 
@@ -33,32 +34,29 @@ function ChatContent({ currentChat = { username: "xxx" }, userName = "x" }) {
     };
   }, [socket, userName]);
 
-  useEffect(() => {
-    async function getMsgList() {
-      const res = await http.post("message/list", {
-        username: userName,
-        currentChater: currentChat.username,
-      });
+  const getMsgList = useCallback(async () => {
+    const res = await http.post("message/list", {
+      username: userName,
+      currentChater: currentChat.username,
+    });
+    sortMsg(res.data.data.messageList);
+    setMsgList(res.data.data.messageList);
+    setTimeout(() => scrollToBottom(msgBox), 100);
+  }, [currentChat.username, userName]);
 
-      res.data.data.messageList.sort(
-        (a: { createAt: number }, b: { createAt: number }) => {
-          return (
-            new Date(a.createAt).getTime() - new Date(b.createAt).getTime()
-          );
-        }
-      );
-      setMsgList(res.data.data.messageList);
-      setTimeout(() => scrollToBottom(msgBox), 100);
-    }
+  useEffect(() => {
     setMsgList([]);
     if (currentChat.username !== undefined) {
       getMsgList();
     }
+  }, [currentChat.username, userName, getMsgList]);
+
+  useEffect(() => {
     socket.on("showMessage", getMsgList);
     return () => {
       socket.off("showMessage");
     };
-  }, [currentChat.username, userName, socket]);
+  }, [getMsgList, socket]);
 
   const inputMsg = (e: any) => {
     setMsg(e.target.value);
