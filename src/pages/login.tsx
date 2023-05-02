@@ -3,6 +3,9 @@ import p from "../../public/pictures/loginbg.jpg";
 import { Button, Form, Input } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { http } from "@/http/http";
+import { useDispatch } from "react-redux";
+import { changeName } from "@/store/store";
 
 type FormData = {
   username: string;
@@ -11,7 +14,15 @@ type FormData = {
 
 function Login() {
   const router = useRouter();
-  const onLogin = async (formData: FormData) => {};
+  const dispatch = useDispatch();
+
+  const onLogin = async (formData: FormData) => {
+    http.post("auth/login", { formData }).then((res) => {
+      dispatch(changeName(formData.username));
+      localStorage.setItem("jwt", res.data.access_token);
+      router.push("/chat");
+    });
+  };
 
   return (
     <Container>
