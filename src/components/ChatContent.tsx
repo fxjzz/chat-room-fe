@@ -1,5 +1,6 @@
 import { wsHOST } from "@/http/config";
 import { http } from "@/http/http";
+import scrollToBottom from "@/utils/scrollToButtom";
 import { Button } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
@@ -19,32 +20,6 @@ function ChatContent({ currentChat = { username: "xxx" }, userName = "x" }) {
     },
   ]);
   const msgBox = useRef<HTMLDivElement | null>(null);
-  const toScreenBottom = () => {
-    const scrollHeight = msgBox.current?.scrollHeight;
-    const scrollTop = msgBox.current?.scrollTop;
-    const clientHeight = msgBox.current?.clientHeight;
-
-    const animateScroll = (timestamp: any) => {
-      const progress = (timestamp - startTime) / duration;
-      const newY =
-        scrollTop! + (scrollHeight! - clientHeight!) * easeInOutQuad(progress);
-
-      msgBox.current?.scrollTo(0, newY);
-
-      if (progress < 1) {
-        window.requestAnimationFrame(animateScroll);
-      }
-    };
-
-    const easeInOutQuad = (t: any) => {
-      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-    };
-
-    const duration = 500; // 滚动动画持续时间
-    const startTime = performance.now(); // 开始时间戳
-
-    window.requestAnimationFrame(animateScroll);
-  };
 
   useEffect(() => {
     socket.emit(
@@ -73,36 +48,17 @@ function ChatContent({ currentChat = { username: "xxx" }, userName = "x" }) {
         }
       );
       setMsgList(res.data.data.messageList);
-      setTimeout(toScreenBottom, 100);
+      setTimeout(() => scrollToBottom(msgBox), 100);
     }
     setMsgList([]);
     if (currentChat.username !== undefined) {
       getMsgList();
     }
-  }, [currentChat.username, userName]);
-
-  useEffect(() => {
-    async function getMsgList() {
-      const res = await http.post("message/list", {
-        username: userName,
-        currentChater: currentChat.username,
-      });
-
-      res.data.data.messageList.sort(
-        (a: { createAt: number }, b: { createAt: number }) => {
-          return (
-            new Date(a.createAt).getTime() - new Date(b.createAt).getTime()
-          );
-        }
-      );
-      setMsgList(res.data.data.messageList);
-      setTimeout(toScreenBottom, 100);
-    }
     socket.on("showMessage", getMsgList);
     return () => {
       socket.off("showMessage");
     };
-  });
+  }, [currentChat.username, userName, socket]);
 
   const inputMsg = (e: any) => {
     setMsg(e.target.value);
@@ -122,7 +78,7 @@ function ChatContent({ currentChat = { username: "xxx" }, userName = "x" }) {
             to: currentChat,
           });
           text.current!.value = "";
-          toScreenBottom();
+          scrollToBottom(msgBox);
         },
         (err) => {
           console.log("发送失败");
