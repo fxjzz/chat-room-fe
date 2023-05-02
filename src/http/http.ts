@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { httpHost } from "./config";
+import { notification } from "antd";
 
 class Http {
   instance: AxiosInstance;
@@ -19,3 +20,24 @@ class Http {
 }
 
 export const http = new Http(httpHost);
+
+http.instance.interceptors.request.use((config) => {
+  const jwt = localStorage.getItem("jwt");
+  if (jwt) {
+    config.headers.Authorization = `Bearer ${jwt}`;
+  }
+  return config;
+});
+
+http.instance.interceptors.request.use(
+  (res) => {
+    return res;
+  },
+  (err) => {
+    notification.error({
+      message: "错误提示",
+      description: "服务器繁忙",
+    });
+    return err;
+  }
+);
