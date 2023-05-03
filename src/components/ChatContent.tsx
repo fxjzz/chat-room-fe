@@ -23,14 +23,9 @@ function ChatContent({ currentChat = { username: "xxx" }, userName = "x" }) {
   const msgBox = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    socket.emit(
-      "connection",
-      async (socket: { join: (arg0: string) => any; id: any }) => {
-        await socket.join(userName);
-      }
-    );
+    socket.emit("connection", userName);
     return () => {
-      socket.close();
+      socket.disconnect();
     };
   }, [socket, userName]);
 
@@ -73,8 +68,9 @@ function ChatContent({ currentChat = { username: "xxx" }, userName = "x" }) {
         () => {
           console.log("发送成功");
           socket.emit("sendMessage", {
-            to: currentChat,
+            to: currentChat.username,
           });
+          getMsgList();
           text.current!.value = "";
           scrollToBottom(msgBox);
         },
