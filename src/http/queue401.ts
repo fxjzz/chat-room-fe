@@ -19,19 +19,21 @@ export default function queue401(config: AxiosRequestConfig) {
     return new Promise((resolve) => {
       requestQueue.push((token: any) => {
         originalRequest.headers!.Authorization = `Bearer ${token}`;
-        resolve(http.instance(originalRequest));
+        resolve(http.instance(config));
       });
     });
+  } else {
+    isRefreshing = true;
+    return http
+      .get("auth/refresh-token")
+      .then((res) => {
+        onRefreshed(res.data.access_token);
+        originalRequest.headers!.Authorization = `Bearer ${res.data.access_token}`;
+        http.instance(config);
+      })
+      .catch((err) => {
+        requestQueue.length = 0;
+        throw err;
+      });
   }
-  isRefreshing = true;
-  return http
-    .get("auth/refresh-token")
-    .then((res) => {
-      onRefreshed(res.data.access_token);
-      originalRequest.headers!.Authorization = `Bearer ${res.data.access_token}`;
-    })
-    .catch((err) => {
-      requestQueue.length = 0;
-      throw err;
-    });
 }

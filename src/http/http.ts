@@ -50,8 +50,9 @@ http.instance.interceptors.response.use(
   (err) => {
     const { status, config } = err.response;
     if (status === 401) {
-      queue401(config);
+      return queue401(config);
     }
-    throw err;
+    return Promise.reject(err);
   }
 );
+
