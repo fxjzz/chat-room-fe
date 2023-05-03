@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import { httpHost } from "./config";
 import { notification } from "antd";
+import queue401 from "./queue401";
 
 class Http {
   instance: AxiosInstance;
@@ -49,9 +50,8 @@ http.instance.interceptors.response.use(
   (err) => {
     const { status, config } = err.response;
     if (status === 401) {
-      http.get("auth/refresh-token").then((res) => {
-        localStorage.setItem("jwt", res.data.access_token);
-      });
+      queue401(config);
     }
+    throw err;
   }
 );
