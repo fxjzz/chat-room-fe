@@ -41,3 +41,17 @@ http.instance.interceptors.request.use(
     return err;
   }
 );
+
+http.instance.interceptors.response.use(
+  (res) => {
+    return res;
+  },
+  (err) => {
+    const { status, config } = err.response;
+    if (status === 401) {
+      http.get("auth/refresh-token").then((res) => {
+        localStorage.setItem("jwt", res.data.access_token);
+      });
+    }
+  }
+);

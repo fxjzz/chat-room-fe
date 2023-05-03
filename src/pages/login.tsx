@@ -20,9 +20,8 @@ function Login() {
     http
       .post("auth/login", formData)
       .then(async (res) => {
-        const refreshToken = await http.post("auth/refresh-token", formData);
         dispatch(changeName(formData.username));
-        localStorage.setItem("refresh_token", refreshToken.data.refresh_token);
+        localStorage.setItem("refresh_token", res.data.refresh_token);
         localStorage.setItem("jwt", res.data.access_token);
         router.push("/chat");
       })
