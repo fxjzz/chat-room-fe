@@ -29,6 +29,15 @@ function ChatContent({ currentChat = { username: "xxx" }, userName = "x" }) {
     };
   }, [socket, userName]);
 
+  useEffect(() => {
+    setInterval(() => {
+      socket.emit("heartbeat", "ping");
+    }, 30 * 1000);
+    return () => {
+      socket.disconnect();
+    };
+  }, [socket]);
+
   const getMsgList = useCallback(async () => {
     const res = await http.post("message/list", {
       username: userName,
