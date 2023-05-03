@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import p from "../../public/pictures/loginbg.jpg";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, notification } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { http } from "@/http/http";
@@ -17,11 +17,21 @@ function Login() {
   const dispatch = useDispatch();
 
   const onLogin = async (formData: FormData) => {
-    http.post("auth/login", formData).then((res) => {
-      dispatch(changeName(formData.username));
-      localStorage.setItem("jwt", res.data.access_token);
-      router.push("/chat");
-    });
+    http
+      .post("auth/login", formData)
+      .then(async (res) => {
+        const refreshToken = await http.post("auth/refresh-token", formData);
+        dispatch(changeName(formData.username));
+        localStorage.setItem("refresh_token", refreshToken.data.refresh_token);
+        localStorage.setItem("jwt", res.data.access_token);
+        router.push("/chat");
+      })
+      .catch(() => {
+        notification.error({
+          message: "登录失败",
+          description: "请检查用户名或密码是否正确",
+        });
+      });
   };
 
   return (
