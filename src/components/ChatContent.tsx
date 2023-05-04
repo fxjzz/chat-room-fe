@@ -1,3 +1,4 @@
+import useWebSocket from "@/hooks/useWebSocket";
 import { wsHOST } from "@/http/config";
 import { http } from "@/http/http";
 import scrollToBottom from "@/utils/scrollToButtom";
@@ -8,7 +9,6 @@ import { io } from "socket.io-client";
 import styled from "styled-components";
 
 function ChatContent({ currentChat = { username: "xxx" }, userName = "x" }) {
-  const socket = io(wsHOST);
   const [msg, setMsg] = useState<string>("");
   const text = useRef<HTMLTextAreaElement>(null);
   const [msgList, setMsgList] = useState([
@@ -21,22 +21,7 @@ function ChatContent({ currentChat = { username: "xxx" }, userName = "x" }) {
     },
   ]);
   const msgBox = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    socket.emit("connection", userName);
-    return () => {
-      socket.disconnect();
-    };
-  }, [socket, userName]);
-
-  useEffect(() => {
-    setInterval(() => {
-      socket.emit("heartbeat", "ping");
-    }, 30 * 1000);
-    return () => {
-      socket.disconnect();
-    };
-  }, [socket]);
+  const [socket] = useWebSocket(userName);
 
   const getMsgList = useCallback(async () => {
     const res = await http.post("message/list", {
