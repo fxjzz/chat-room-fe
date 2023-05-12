@@ -7,7 +7,9 @@ const HEARTBEAT_INTERVAL = 30 * 1000;
 let lastPing: number;
 
 function useWebSocket(userName: string) {
-  const socket = io(wsHOST);
+  const socket = io(wsHOST, {
+    autoConnect: false,
+  });
   let timer = useRef<NodeJS.Timer>();
   useEffect(() => {
     socket.on("connect", () => {

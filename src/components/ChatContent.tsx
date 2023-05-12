@@ -4,7 +4,7 @@ import { http } from "@/http/http";
 import scrollToBottom from "@/utils/scrollToButtom";
 import sortMsg from "@/utils/sortMsg";
 import { Button } from "antd";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import styled from "styled-components";
 
@@ -73,7 +73,13 @@ function ChatContent({ currentChat = { username: "xxx" }, userName = "x" }) {
         }
       );
   };
-
+  const enterMsg = (
+    event: KeyboardEvent<HTMLAnchorElement | HTMLButtonElement>
+  ) => {
+    if (event.key === "Enter") {
+      sendMsg();
+    }
+  };
   return (
     <Content>
       <div className="title">{currentChat && currentChat.username}</div>
@@ -93,7 +99,7 @@ function ChatContent({ currentChat = { username: "xxx" }, userName = "x" }) {
           <textarea className="text" onInput={inputMsg} ref={text} />
           <div className="send">
             <span>{msg.length} / 500</span>
-            <Button type="primary" onClick={sendMsg}>
+            <Button type="primary" onClick={sendMsg} onKeyDown={enterMsg}>
               发送
             </Button>
           </div>
